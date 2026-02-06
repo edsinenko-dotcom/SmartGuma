@@ -1,0 +1,1055 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>SmartGuma — Цифровой помощник по парку, ТС и шинам</title>
+  <style>
+    :root{--bg:#0b1020;--card:rgba(255,255,255,.06);--text:rgba(255,255,255,.98);--muted:rgba(255,255,255,.88);--border:rgba(255,255,255,.18);--ok:#34d399;--warn:#fbbf24;--crit:#fb7185;--accent1:rgba(59,130,246,.85);--accent2:rgba(168,85,247,.80);--shadow:0 18px 50px rgba(0,0,0,.45);--radius:18px}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html{height:100%}
+    body{margin:0;min-height:100%;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,"Noto Sans","Helvetica Neue",sans-serif;color:var(--text);background:radial-gradient(1200px 600px at 20% -10%,rgba(59,130,246,.35),transparent 60%),radial-gradient(900px 500px at 90% 10%,rgba(168,85,247,.25),transparent 55%),radial-gradient(700px 500px at 40% 110%,rgba(16,185,129,.20),transparent 55%),var(--bg);background-attachment:fixed;padding:12px;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:calc(12px + env(safe-area-inset-bottom));overflow-x:hidden}
+    .wrap{max-width:1180px;margin:0 auto}
+
+    .card-base{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.05));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .topbar.card-base{background:linear-gradient(180deg,rgba(18,25,45,.97),rgba(12,18,35,.98));border-color:var(--border);color:var(--text)}
+    .topbar .brand h1,.topbar .brand p,.topbar .pill label,.topbar .btn{color:var(--text)}
+    .topbar{display:flex;flex-direction:column;gap:10px;padding:12px;position:sticky;top:calc(10px + env(safe-area-inset-top));backdrop-filter:blur(10px);z-index:10}
+    .topRow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .brand{display:flex;gap:10px;align-items:center;min-width:0;flex:1}
+    .logo{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,var(--accent1),var(--accent2));box-shadow:0 10px 30px rgba(59,130,246,.25);border:1px solid rgba(255,255,255,.14);flex:0 0 auto}
+    .brandText{min-width:0}
+    .brand h1{margin:0;font-size:14px;line-height:1.15;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .productIntro{margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(15,22,42,.85);border:1px solid var(--border);font-size:12px;color:var(--muted);line-height:1.45}
+    .productIntro strong{color:var(--text);font-weight:600}
+    .productIntro .row{margin-top:6px}
+    .productIntro .row:first-child{margin-top:0}
+    .topActions{display:flex;gap:8px;flex:0 0 auto}
+
+    .btn{padding:10px 12px;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--text);font-size:12px;cursor:pointer;transition:transform .08s,background .15s;user-select:none;min-height:42px}
+    .btn:hover{background:rgba(255,255,255,.09)}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{background:linear-gradient(135deg,var(--accent1),var(--accent2));border-color:rgba(255,255,255,.18)}
+    .btn.icon{width:42px;display:flex;align-items:center;justify-content:center;padding:0;font-size:16px}
+
+    .controls{display:flex;flex-direction:column;gap:10px}
+    .controlsCollapsed{display:none}
+    .pill{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid var(--border);min-height:46px}
+    .pill label{font-size:12px;color:var(--muted);flex:0 0 auto;min-width:56px}
+    select,input[type="search"]{background:transparent;border:none;outline:none;color:var(--text);font-size:14px;width:100%;min-width:0}
+    select option{background:#0e1430;color:var(--text)}
+    input[type="search"]::placeholder{color:rgba(255,255,255,.6)}
+
+    .grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+    .card{overflow:hidden}
+    .cardHeader{padding:12px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .headerTop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .headerTop > div:first-child{min-width:0}
+    .headerTop .tabs{flex-shrink:0}
+    .cardHeader h2{margin:0;font-size:15px;letter-spacing:.2px;font-weight:600}
+    .sub{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.35}
+    .cardBody{padding:12px}
+
+    .tabs{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+    .tabs::-webkit-scrollbar{height:0}
+    .tab{padding:10px 12px;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.05);font-size:12px;cursor:pointer;white-space:nowrap;min-height:42px;display:flex;align-items:center}
+    .tab.active{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.18)}
+
+    .kpiRow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    .kpi{padding:12px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);min-height:86px}
+    .kpi.clickable{cursor:pointer;transition:background .15s,transform .08s,border-color .15s}
+    .kpi.clickable:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18)}
+    .kpi.clickable:active{transform:scale(.98)}
+    .kpi .label{font-size:13px;color:var(--muted);margin-bottom:6px;line-height:1.3}
+    .kpi .value{font-size:17px;letter-spacing:.2px;font-weight:600}
+    .kpi .hint{margin-top:8px;font-size:13px;color:var(--muted);line-height:1.35}
+    .kpi.clickable .hint{color:var(--accent1);cursor:pointer}
+
+    .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font-size:12px;white-space:nowrap}
+    .chip.clickable{cursor:pointer;transition:background .15s,transform .08s,border-color .15s}
+    .chip.clickable:hover{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.22)}
+    .chip.clickable:active{transform:scale(.97)}
+    .chip.clickable.active{border-color:rgba(59,130,246,.5);background:rgba(59,130,246,.12)}
+    .filterChips{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+    .dot{width:10px;height:10px;border-radius:999px;background:var(--muted);box-shadow:0 0 0 3px rgba(255,255,255,.06)}
+    .dot.ok{background:var(--ok);box-shadow:0 0 0 3px rgba(52,211,153,.15)}
+    .dot.warn{background:var(--warn);box-shadow:0 0 0 3px rgba(251,191,36,.14)}
+    .dot.crit{background:var(--crit);box-shadow:0 0 0 3px rgba(251,113,133,.14)}
+    .badge{padding:6px 8px;border-radius:999px;font-size:11px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06)}
+    .badge.ok{border-color:rgba(52,211,153,.25);background:rgba(52,211,153,.08)}
+    .badge.warn{border-color:rgba(251,191,36,.25);background:rgba(251,191,36,.08)}
+    .badge.crit{border-color:rgba(251,113,133,.25);background:rgba(251,113,133,.08)}
+    .badge.best{border-color:rgba(59,130,246,.30);background:rgba(59,130,246,.10);color:rgba(147,197,253,1)}
+
+    .list{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+    .item{padding:14px;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:background .15s,transform .08s}
+    .item:hover{background:rgba(255,255,255,.08)}
+    .item:active{transform:translateY(1px)}
+    .item .meta{flex:1;min-width:0}
+    .item .title{font-size:13px;margin:0;letter-spacing:.2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;line-height:1.25}
+    .item .desc{margin:6px 0 0;font-size:13px;color:var(--muted);line-height:1.4}
+
+    .vehicleWrap{display:grid;gap:12px}
+    .vehicleCard{padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);overflow:hidden}
+    .vehTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+    .vehTop h3{margin:0;font-size:13px;letter-spacing:.2px}
+    .vehTop .small{margin-top:4px;font-size:13px;color:var(--muted);line-height:1.35}
+
+    /* Driver rating */
+    .ratingRow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+    .stars{display:flex;gap:3px;flex-shrink:0}
+    .star{width:18px;height:18px;border-radius:6px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:10px;user-select:none}
+    .star.on{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.25);color:#fbbf24}
+    .ratingHint{font-size:12px;color:var(--muted);line-height:1.3}
+
+    /* Vehicle photos */
+    .vehPhotos{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+    .vehPhoto{width:80px;height:54px;border-radius:12px;border:1px solid rgba(255,255,255,.14);overflow:hidden;background:rgba(255,255,255,.06);cursor:pointer;position:relative}
+    .vehPhoto img{width:100%;height:100%;object-fit:cover;display:block}
+    .vehPhoto::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.22));pointer-events:none}
+
+    .axles{margin-top:12px;display:grid;gap:10px}
+    .axle{display:grid;grid-template-columns:76px 1fr;gap:10px;align-items:start}
+    .axle .label{font-size:13px;color:var(--muted);padding-top:10px;line-height:1.3}
+    .tires{display:flex;gap:8px;flex-wrap:wrap;padding:10px;border-radius:14px;border:1px dashed rgba(255,255,255,.14);background:rgba(255,255,255,.03)}
+    .tire{width:44px;height:44px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;user-select:none}
+    .tire.ok{box-shadow:inset 0 0 0 2px rgba(52,211,153,.35)}
+    .tire.warn{box-shadow:inset 0 0 0 2px rgba(251,191,36,.35)}
+    .tire.crit{box-shadow:inset 0 0 0 2px rgba(251,113,133,.38)}
+    .tire:hover{background:rgba(255,255,255,.10)}
+
+    /* Tire thumbnails */
+    .thumbRow{display:flex;gap:8px;align-items:center;margin-top:8px}
+    .thumbs{display:flex;gap:6px;flex-wrap:wrap}
+    .thumb{width:48px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);overflow:hidden;cursor:pointer;position:relative;flex:0 0 auto}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.2));pointer-events:none}
+    .thumbLabel{font-size:12px;color:var(--muted);line-height:1.3}
+
+    .tableWrap{margin-top:12px}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    thead{display:none}
+    tbody tr{display:block;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);border-radius:16px;padding:10px;margin-bottom:10px;cursor:pointer;overflow:hidden}
+    tbody td{display:block;padding:5px 0}
+    .rowLine{color:var(--muted);font-size:12px;line-height:1.35}
+    .rowCols{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+
+    .drawerOverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);display:none;align-items:flex-end;z-index:30;padding:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+    .drawer{width:100%;border-radius:22px 22px 16px 16px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(180deg,rgba(20,26,55,.96),rgba(10,16,32,.98));box-shadow:var(--shadow);padding:12px 12px 14px;max-height:85vh;overflow:auto}
+    .grabber{width:44px;height:4px;border-radius:99px;background:rgba(255,255,255,.25);margin:2px auto 10px}
+    .drawerTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .drawerTop h3{margin:0;font-size:14px;letter-spacing:.2px}
+    .closeX{cursor:pointer;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:16px;user-select:none;flex:0 0 auto}
+    .drawerGrid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+    .field{padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05)}
+    .field .k{font-size:13px;color:var(--muted);line-height:1.3}
+    .field .v{margin-top:6px;font-size:14px;line-height:1.3}
+    .drawerActions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+    .drawerActions .btn{width:100%}
+    .footerHint{margin-top:16px;padding-top:12px;border-top:1px solid var(--border);font-size:13px;color:rgba(255,255,255,.9);line-height:1.45;max-width:52ch}
+    .sectionTitle{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+    .sectionSort{font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.35}
+
+    /* Photo viewer */
+    .photoOverlay{position:fixed;inset:0;display:none;z-index:60;background:rgba(0,0,0,.78);backdrop-filter:blur(6px);padding:12px;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+    .photoWrap{height:100%;display:flex;flex-direction:column;gap:10px}
+    .photoTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .photoTitle{font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+    .photoNav{display:flex;gap:8px}
+    .photoBtn{width:44px;height:44px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;user-select:none}
+    .photoBtn:active{transform:translateY(1px)}
+    .photoCanvas{flex:1;border-radius:18px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.04);overflow:hidden;display:flex;align-items:center;justify-content:center}
+    .photoCanvas img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+    .photoDots{display:flex;justify-content:center;gap:8px;margin-top:2px}
+    .pDot{width:7px;height:7px;border-radius:99px;background:rgba(255,255,255,.22);cursor:pointer}
+    .pDot.on{background:rgba(255,255,255,.70)}
+
+    /* Service & Warranty blocks */
+    .svcBlock{margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);overflow:hidden}
+    .svcBlock .svcHead{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--accent1);flex-wrap:wrap;line-height:1.4}
+    .svcBlock .svcHead svg{width:14px;height:14px;fill:currentColor;flex-shrink:0}
+    .svcBlock .svcRow{margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;font-size:11px;color:var(--muted)}
+    .svcBlock .svcItem{padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.06);max-width:100%;word-break:break-word}
+    .svcBlock .svcItem.done{color:var(--ok)}
+    .svcBlock .svcItem.rec{color:var(--warn)}
+    .svcBtn{margin-top:8px;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:var(--text);font-size:11px;cursor:pointer}
+    .svcBtn:hover{background:rgba(255,255,255,.12)}
+    .warrantyBadge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:8px;background:linear-gradient(135deg,rgba(46,204,113,.18),rgba(52,152,219,.18));border:1px solid rgba(46,204,113,.3);color:var(--ok);font-size:10px;font-weight:600}
+    .warrantyBadge svg{width:11px;height:11px;fill:currentColor}
+    .repairBadge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:8px;background:rgba(241,196,15,.12);border:1px solid rgba(241,196,15,.25);color:#f1c40f;font-size:10px}
+
+    /* Светлая тема */
+    html[data-theme="light"]{--bg:#eef2f7;--text:#0f172a;--muted:#475569;--border:#e2e8f0;--ok:#059669;--warn:#d97706;--crit:#dc2626;--accent1:rgba(59,130,246,.9);--accent2:rgba(124,58,237,.85);--shadow:0 4px 20px rgba(0,0,0,.08)}
+    html[data-theme="light"] body{background:radial-gradient(1200px 600px at 20% -10%,rgba(59,130,246,.12),transparent 60%),radial-gradient(900px 500px at 90% 10%,rgba(168,85,247,.08),transparent 55%),radial-gradient(700px 500px at 40% 110%,rgba(16,185,129,.08),transparent 55%),#eef2f7}
+    html[data-theme="light"] .card-base,.topbar{background:linear-gradient(180deg,#fff,#f8fafc);border-color:var(--border)}
+    html[data-theme="light"] .logo{border-color:rgba(0,0,0,.08);box-shadow:0 4px 16px rgba(59,130,246,.2)}
+    html[data-theme="light"] .btn{background:rgba(0,0,0,.04);border-color:var(--border)}
+    html[data-theme="light"] .btn:hover{background:rgba(0,0,0,.07)}
+    html[data-theme="light"] .btn.primary{background:linear-gradient(135deg,var(--accent1),var(--accent2));border-color:rgba(255,255,255,.3);color:#fff}
+    html[data-theme="light"] .pill{background:rgba(0,0,0,.03);border-color:var(--border)}
+    html[data-theme="light"] select option{background:#fff;color:var(--text)}
+    html[data-theme="light"] input[type="search"]::placeholder{color:var(--muted)}
+    html[data-theme="light"] .cardHeader{border-bottom-color:var(--border)}
+    html[data-theme="light"] .tab{background:rgba(0,0,0,.04);border-color:var(--border)}
+    html[data-theme="light"] .tab.active{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.35)}
+    html[data-theme="light"] .kpi{background:rgba(0,0,0,.03);border-color:var(--border)}
+    html[data-theme="light"] .kpi.clickable:hover{background:rgba(0,0,0,.05)}
+    html[data-theme="light"] .chip{background:rgba(0,0,0,.04);border-color:var(--border)}
+    html[data-theme="light"] .chip.clickable:hover{background:rgba(0,0,0,.06)}
+    html[data-theme="light"] .chip.clickable.active{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.4)}
+    html[data-theme="light"] .dot{box-shadow:0 0 0 3px rgba(0,0,0,.06)}
+    html[data-theme="light"] .dot.ok{box-shadow:0 0 0 3px rgba(5,150,105,.2)}
+    html[data-theme="light"] .dot.warn{box-shadow:0 0 0 3px rgba(217,119,6,.2)}
+    html[data-theme="light"] .dot.crit{box-shadow:0 0 0 3px rgba(220,38,38,.2)}
+    html[data-theme="light"] .badge{background:rgba(0,0,0,.06);border-color:var(--border)}
+    html[data-theme="light"] .badge.ok{background:rgba(5,150,105,.12);border-color:rgba(5,150,105,.3)}
+    html[data-theme="light"] .badge.warn{background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.3)}
+    html[data-theme="light"] .badge.crit{background:rgba(220,38,38,.12);border-color:rgba(220,38,38,.3)}
+    html[data-theme="light"] .badge.best{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.35);color:#2563eb}
+    html[data-theme="light"] .item{background:rgba(0,0,0,.03);border-color:var(--border)}
+    html[data-theme="light"] .item:hover{background:rgba(0,0,0,.05)}
+    html[data-theme="light"] .vehicleCard,.vehPhoto,.tires,.tire{background:rgba(0,0,0,.03);border-color:var(--border)}
+    html[data-theme="light"] .tire:hover{background:rgba(0,0,0,.06)}
+    html[data-theme="light"] .thumb{background:rgba(0,0,0,.04);border-color:var(--border)}
+    html[data-theme="light"] tbody tr{background:rgba(0,0,0,.02);border-color:var(--border)}
+    html[data-theme="light"] .drawer{background:linear-gradient(180deg,#f8fafc,#fff);border-color:var(--border)}
+    html[data-theme="light"] .closeX,.field{background:rgba(0,0,0,.04);border-color:var(--border)}
+    html[data-theme="light"] .grabber{background:var(--muted)}
+    html[data-theme="light"] .photoOverlay{background:rgba(0,0,0,.85)}
+    html[data-theme="light"] .photoBtn,.photoCanvas,.pDot{background:rgba(255,255,255,.9);border-color:var(--border);color:var(--text)}
+    html[data-theme="light"] .pDot.on{background:var(--accent1)}
+    html[data-theme="light"] .themeToggleSide{background:rgba(255,255,255,.95);border-color:var(--border);box-shadow:0 2px 12px rgba(0,0,0,.12)}
+    html[data-theme="light"] .themeToggleSide:hover{background:#fff}
+    html[data-theme="light"] .themeToggleSide::after{content:"☀️"}
+    html[data-theme="light"] .productIntro{background:rgba(0,0,0,.03);border-color:var(--border)}
+    html[data-theme="light"] .footerHint{color:var(--muted)}
+    .themeToggleSide::after{content:"🌙"}
+    html[data-theme="dark"] .themeToggleSide::after{content:"🌙"}
+    .themeToggleSide{position:fixed;top:50%;right:0;transform:translateY(-50%);z-index:100;width:44px;height:48px;padding:0;margin-right:env(safe-area-inset-right);border:1px solid var(--border);border-right:none;border-radius:14px 0 0 14px;background:rgba(255,255,255,.08);backdrop-filter:blur(8px);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:-4px 0 20px rgba(0,0,0,.15);transition:background .2s,transform .15s}
+    .themeToggleSide:hover{background:rgba(255,255,255,.12)}
+    .themeToggleSide:active{transform:translateY(-50%) scale(0.96)}
+
+    @media(min-width:980px){
+      body{padding:18px}
+      .topbar{flex-direction:row;align-items:center;justify-content:space-between;padding:14px 16px;top:12px}
+      .controls{flex-direction:row;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+      .topActions{display:none}
+      .grid{grid-template-columns:1.2fr .8fr;gap:14px;margin-top:14px}
+      .cardHeader{flex-direction:row;align-items:flex-start;justify-content:space-between}
+      .headerTop{flex:1}
+      .kpiRow{grid-template-columns:repeat(4,1fr)}
+      thead{display:table-header-group}
+      tbody tr{display:table-row;border:none;background:transparent;padding:0;margin:0;border-radius:0}
+      tbody td{display:table-cell;padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:top}
+      .tableWrap{overflow:auto}
+      .drawerActions{grid-template-columns:auto auto auto}
+      .drawerActions .btn{width:auto}
+      .drawerGrid{grid-template-columns:1fr 1fr}
+      .thumb{width:56px;height:40px}
+    }
+  </style>
+  <script>
+    (function(){ var t = localStorage.getItem('sg-theme'); if (t === 'light') document.documentElement.setAttribute('data-theme','light'); })();
+  </script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar card-base">
+      <div class="topRow">
+        <div class="brand">
+          <div class="logo" aria-hidden="true"></div>
+          <div class="brandText">
+            <h1>SmartGuma</h1>
+            <p>Цифровой помощник по парку, ТС и шинам</p>
+          </div>
+        </div>
+        <div class="topActions">
+          <button class="btn icon" id="filtersToggle" aria-label="Фильтры" title="Фильтры">☰</button>
+          <button class="btn icon" id="quickActionsToggle" aria-label="Действия" title="Действия">⚡</button>
+        </div>
+      </div>
+
+      <div class="controls" id="controls">
+        <div class="pill">
+          <label for="statusSel">Статус</label>
+          <select id="statusSel">
+            <option value="all">Все</option>
+            <option value="crit">Критично</option>
+            <option value="warn">Внимание</option>
+            <option value="ok">Норма</option>
+          </select>
+        </div>
+        <div class="pill">
+          <label for="q">Поиск</label>
+          <input id="q" type="search" placeholder="ТС, шина, бренд, серийник, инспекция...">
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn primary" id="createWO">Записаться на сервис</button>
+          <button class="btn" id="clearBtn">Сброс</button>
+        </div>
+      </div>
+      <div class="productIntro">
+        <div class="row"><strong>Вы видите:</strong> история шин, инспекции (глубина, пробеги, фото/видео), состояние по ТС и парку, отклонения и риски, сравнение «было / стало».</div>
+        <div class="row"><strong>Вы можете:</strong> согласовать сервис, заменить или списать шину, подать рекламацию, записаться на сервис, заказать шины, работать с жалобами и статусами.</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card card-base">
+        <div class="cardHeader">
+          <div class="headerTop">
+            <div>
+              <h2 id="mainTitle">Обзор парка</h2>
+              <div class="sub" id="mainSub">Состояние шин по ТС, отклонения и риски · Обновление: —</div>
+            </div>
+            <div class="tabs" role="tablist" aria-label="Разделы">
+              <div class="tab active" data-tab="fleet" role="tab" aria-selected="true">Парк</div>
+              <div class="tab" data-tab="vehicle" role="tab" aria-selected="false">ТС</div>
+              <div class="tab" data-tab="tires" role="tab" aria-selected="false">Шины</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cardBody">
+          <div id="viewFleet">
+            <div class="kpiRow" id="kpis"></div>
+            <div class="filterChips" id="filterChips">
+              <span class="chip clickable" data-filter="ok"><span class="dot ok"></span><span id="chipOk">—</span></span>
+              <span class="chip clickable" data-filter="warn"><span class="dot warn"></span><span id="chipWarn">—</span></span>
+              <span class="chip clickable" data-filter="crit"><span class="dot crit"></span><span id="chipCrit">—</span></span>
+            </div>
+            <div class="prioritySection" style="margin-top:16px">
+              <div class="sectionTitle">Рекомендуемые действия (30 дней)</div>
+              <div class="sectionSort">Сортировка: риск → срочность → стоимость. Замените, согласуйте сервис или подайте рекламацию.</div>
+              <div class="list" id="priorityList"></div>
+            </div>
+          </div>
+
+          <div id="viewVehicle" hidden>
+            <div class="vehicleWrap" id="vehicleWrap"></div>
+          </div>
+
+          <div id="viewTires" hidden>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
+              <div>
+                <div class="sectionTitle">Реестр шин</div>
+                <div class="sectionSort">История, инспекции, фото. Подсветка — минимальная стоимость 1 км.</div>
+              </div>
+              <div class="chip"><span class="dot"></span><span id="tiresCount">—</span></div>
+            </div>
+            <div class="tableWrap">
+              <table>
+                <thead>
+                  <tr style="text-align:left;color:var(--muted)">
+                    <th>Шина</th><th>ТС</th><th>Позиция</th><th>Пробег/Стоимость</th><th>Фото</th>
+                  </tr>
+                </thead>
+                <tbody id="tiresTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-base">
+        <div class="cardHeader">
+          <div class="headerTop">
+            <div>
+              <h2>Ближайшие события</h2>
+              <div class="sub">Инспекции, плановые точки контроля, запись на сервис и рекомендации по SLA</div>
+            </div>
+            <span class="chip"><span class="dot"></span><span id="eventsCount">—</span></span>
+          </div>
+        </div>
+        <div class="cardBody">
+          <div class="list" id="events"></div>
+          <div class="footerHint">
+            SmartGuma — цифровой помощник владельцам автопарков: состояние шин, инспекции, сервис, замены, рекламации, планирование и закупка. UI-макет.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button type="button" class="themeToggleSide" id="themeToggle" aria-label="Светлая / Тёмная тема" title="Светлая / Тёмная тема"></button>
+
+  <div class="drawerOverlay" id="drawerOverlay" role="dialog" aria-modal="true" aria-label="Карточка">
+    <div class="drawer">
+      <div class="grabber" aria-hidden="true"></div>
+      <div class="drawerTop">
+        <div style="min-width:0">
+          <h3 id="drawerTitle">Карточка</h3>
+          <div class="sub" id="drawerSub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+        </div>
+        <div class="closeX" id="drawerClose" aria-label="Закрыть">×</div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+        <span class="chip" id="drawerStatusChip"><span class="dot"></span><span id="drawerStatusText">—</span></span>
+        <span class="chip"><span class="dot"></span><span id="drawerUpdated">—</span></span>
+      </div>
+      <div class="drawerGrid" id="drawerFields"></div>
+      <div class="drawerActions">
+        <button class="btn primary" id="drawerAction1">Согласовать сервис</button>
+        <button class="btn" id="drawerAction2">Фото / Открыть</button>
+        <button class="btn" id="drawerAction3">Записаться на сервис</button>
+      </div>
+      <div class="footerHint">Доступные действия: согласовать сервис, заменить/списать шину, подать рекламацию, записаться на сервис, заказать шины, жалобы и статусы.</div>
+    </div>
+  </div>
+
+  <div class="photoOverlay" id="photoOverlay" role="dialog" aria-modal="true" aria-label="Фото">
+    <div class="photoWrap">
+      <div class="photoTop">
+        <div class="photoTitle" id="photoTitle">Фото</div>
+        <div class="photoNav">
+          <div class="photoBtn" id="photoPrev" aria-label="Предыдущее">‹</div>
+          <div class="photoBtn" id="photoNext" aria-label="Следующее">›</div>
+          <div class="photoBtn" id="photoClose" aria-label="Закрыть">×</div>
+        </div>
+      </div>
+      <div class="photoCanvas"><img id="photoImg" alt="Фото"></div>
+      <div class="photoDots" id="photoDots"></div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    'use strict';
+
+    // Demo photos
+    const TIRE_PHOTOS = [
+      "https://i.ibb.co/nxKcSjg/2440934-570x570.jpg",
+      "https://i.ibb.co/QjrdRvWq/67732bd7878248a3a24c4f8baf0117f8.png",
+      "https://i.ibb.co/JFk3Z3dh/lanvigator-mile-max-228x228.jpg"
+    ];
+    const TRUCK_PHOTOS = [
+      "https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=600",
+      "https://images.unsplash.com/photo-1616432043562-3671ea2e5242?w=600"
+    ];
+
+    // Mock data
+    const db = {
+      clients: [{
+        id:"c1", name:"Клиент A (50 ТС)", updatedAt:"2026-01-06 09:12",
+        fleet:{vehicles:8,tires:96,ok:68,warn:20,crit:8,forecastCost30:186000,downtimeRisk30:"Средний",sla:"24–48 часов",
+          costs:{
+            maintenance:42000, maintenanceItems:["ТО MAN TGX — 28 000 грн","ТО DAF XF — 14 000 грн"],
+            repair:72000, repairItems:["Замена шин ось 3 (MAN) — 58 000 грн","Балансировка + перестановка — 14 000 грн"],
+            tires:72000, tiresCount:3, tiresItems:["Goodyear 315/80 R22.5 — 24 000 грн × 2","Bridgestone 315/80 R22.5 — 24 000 грн × 1"]
+          }},
+        vehicles:[
+          {id:"v1",title:"MAN TGX 18.500",plate:"AA 1234 XX",photos:[TRUCK_PHOTOS[0],TRUCK_PHOTOS[1]],status:"warn",lastInspection:"2026-01-04",
+            driver:{name:"Игорь К.",rating:4.2,last30:4.0,notes:"Резкие торможения"},
+            notes:"Неравномерный износ на задней оси",
+            service:{
+              lastVisit:"2025-12-20",
+              station:"СТО «АвтоСервис+»",
+              recommended:["Замена тормозных колодок","Диагностика подвески","Балансировка колёс"],
+              done:["Замена масла","Замена фильтров","Проверка ходовой"],
+              reportId:"INS-2025-1220-MAN"
+            },
+            axles:[
+              {name:"Ось 1",tires:[
+                {id:"t1",code:"T-0001",brand:"Michelin",serialNo:"MIC-7A19-001",pos:"1L",tread:7.2,risk:"ok",replaceETA:"—",pressure:"Норма",wear:"Равномерный",kmLeft:38000,kmRun:92000,cost:18500,photos:[TIRE_PHOTOS[0],TIRE_PHOTOS[1]],
+                  product:true,warranty:{until:"2027-06-15",type:"Гарантия 3 года",services:["Бесплатная балансировка","Шиномонтаж со скидкой 20%"]}},
+                {id:"t2",code:"T-0002",brand:"Michelin",serialNo:"MIC-7A19-002",pos:"1R",tread:6.9,risk:"ok",replaceETA:"—",pressure:"Норма",wear:"Равномерный",kmLeft:36000,kmRun:88000,cost:18500,photos:[TIRE_PHOTOS[1]],
+                  product:true,warranty:{until:"2027-06-15",type:"Гарантия 3 года",services:["Бесплатная балансировка"]}}
+              ]},
+              {name:"Ось 2",tires:[
+                {id:"t3",code:"T-0003",brand:"Bridgestone",serialNo:"BRI-3D55-003",pos:"2L",tread:4.0,risk:"warn",replaceETA:"30–45 дней",pressure:"Отклонение",wear:"Плечевой износ",kmLeft:12000,kmRun:74000,cost:16200,photos:[TIRE_PHOTOS[2],TIRE_PHOTOS[0]],
+                  repairs:[{date:"2025-11-10",type:"Вулканизация",cost:850,station:"ШиноСервис"}]},
+                {id:"t4",code:"T-0004",brand:"Bridgestone",serialNo:"BRI-3D55-004",pos:"2R",tread:3.6,risk:"warn",replaceETA:"30–45 дней",pressure:"Отклонение",wear:"Плечевой износ",kmLeft:9000,kmRun:71000,cost:16200,photos:[TIRE_PHOTOS[2]]}
+              ]},
+              {name:"Ось 3",tires:[
+                {id:"t5",code:"T-0005",brand:"Goodyear",serialNo:"GDY-9F01-005",pos:"3L",tread:2.2,risk:"crit",replaceETA:"7–14 дней",pressure:"Низкое",wear:"Неравномерный",kmLeft:2500,kmRun:61000,cost:14500,photos:[TIRE_PHOTOS[0],TIRE_PHOTOS[2]],
+                  repairs:[{date:"2025-08-22",type:"Латка бокового пореза",cost:1200,station:"СТО Колесо"},{date:"2025-10-05",type:"Балансировка",cost:350,station:"АвтоСервис+"}]},
+                {id:"t6",code:"T-0006",brand:"Goodyear",serialNo:"GDY-9F01-006",pos:"3R",tread:2.5,risk:"crit",replaceETA:"7–14 дней",pressure:"Низкое",wear:"Неравномерный",kmLeft:3200,kmRun:64000,cost:14500,photos:[TIRE_PHOTOS[1]]}
+              ]}
+            ]},
+          {id:"v2",title:"DAF XF 480",plate:"AI 7788 BC",photos:[TRUCK_PHOTOS[1]],status:"ok",lastInspection:"2026-01-05",
+            driver:{name:"Сергій М.",rating:4.7,last30:4.8,notes:"Аккуратная эксплуатация"},
+            notes:"Показатели в норме",
+            axles:[
+              {name:"Ось 1",tires:[
+                {id:"t7",code:"T-0010",brand:"Continental",serialNo:"CON-2K18-010",pos:"1L",tread:7.8,risk:"ok",replaceETA:"—",pressure:"Норма",wear:"Равномерный",kmLeft:42000,kmRun:98000,cost:17600,photos:[TIRE_PHOTOS[2]],
+                  product:true,warranty:{until:"2028-02-01",type:"Гарантия 5 лет",services:["Страхование от проколов","Бесплатный шиномонтаж","Сезонное хранение"]}},
+                {id:"t8",code:"T-0011",brand:"Continental",serialNo:"CON-2K18-011",pos:"1R",tread:7.6,risk:"ok",replaceETA:"—",pressure:"Норма",wear:"Равномерный",kmLeft:40000,kmRun:102000,cost:17600,photos:[TIRE_PHOTOS[0]],
+                  product:true,warranty:{until:"2028-02-01",type:"Гарантия 5 лет",services:["Страхование от проколов","Бесплатный шиномонтаж"]}}
+              ]},
+              {name:"Ось 2",tires:[
+                {id:"t9",code:"T-0012",brand:"Hankook",serialNo:"HNK-0P77-012",pos:"2L",tread:6.2,risk:"ok",replaceETA:"—",pressure:"Норма",wear:"Равномерный",kmLeft:28000,kmRun:83000,cost:12800,photos:[TIRE_PHOTOS[1]],
+                  repairs:[{date:"2025-09-18",type:"Балансировка",cost:300,station:"DAF-Сервис"}]},
+                {id:"t10",code:"T-0013",brand:"Hankook",serialNo:"HNK-0P77-013",pos:"2R",tread:6.0,risk:"ok",replaceETA:"—",pressure:"Норма",wear:"Равномерный",kmLeft:26000,kmRun:85000,cost:12800,photos:[TIRE_PHOTOS[2]]}
+              ]}
+            ]}
+        ],
+        actions:[
+          {id:"a1",severity:"crit",title:"Замена шин на оси 3 (MAN TGX AA 1234 XX)",tags:["Риск простоя","SLA 48ч"],desc:"Две шины в критической зоне. Замена 7–14 дней.",cost:72000,due:"До 2026-01-20"},
+          {id:"a2",severity:"warn",title:"Перестановка + контроль давления (MAN TGX)",tags:["Снижение износа"],desc:"Плечевой износ на оси 2. Корректировка давления.",cost:8500,due:"До 2026-01-25"},
+          {id:"a3",severity:"warn",title:"Проверка низкого давления (MAN TGX)",tags:["Профилактика"],desc:"Низкое давление на оси 3. Диагностика.",cost:2500,due:"До 2026-01-18"}
+        ],
+        events:[
+          {id:"e1",severity:"warn",title:"Плановая ИК-инспекция (DAF XF 480)",desc:"Инспекция по графику.",when:"2026-01-12"},
+          {id:"e2",severity:"crit",title:"Слот сервиса по SLA (MAN TGX)",desc:"Резерв слота для замен по оси 3.",when:"2026-01-10"},
+          {id:"e3",severity:"warn",title:"Отчёт по парку",desc:"Месячная сводка.",when:"2026-01-31"}
+        ]
+      }]
+    };
+
+    // Utils
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    const fmtUAH = n => new Intl.NumberFormat("uk-UA").format(Math.round(n)) + " грн";
+    const fmtKM = n => new Intl.NumberFormat("uk-UA").format(Math.round(n)) + " км";
+    const fmtK = n => (Math.round(n/100)/10).toFixed(1) + " тис";
+    const fmtCpk = n => isFinite(n) && n < Infinity ? n.toFixed(2) + " грн/км" : "—";
+    const bySev = s => s==="crit"?0:s==="warn"?1:2;
+    const sevLabel = s => s==="crit"?"Критично":s==="warn"?"Внимание":"Норма";
+    const sevClass = s => s==="crit"?"crit":s==="warn"?"warn":"ok";
+
+    const cpk = t => (t.kmRun && t.cost && t.kmRun > 0) ? t.cost / t.kmRun : Infinity;
+
+    const starsHtml = r => {
+      const on = Math.round(Math.max(0,Math.min(5,r)));
+      return Array.from({length:5},(_,i)=>`<span class="star ${i<on?"on":""}">★</span>`).join("");
+    };
+
+    function collectTires(client) {
+      const out = [];
+      for (const v of client.vehicles)
+        for (const ax of v.axles)
+          for (const t of ax.tires)
+            out.push({...t, cpk:cpk(t), vId:v.id, vTitle:v.title, plate:v.plate, axle:ax.name, driver:v.driver, vPhotos:v.photos||[], vService:v.service});
+      return out;
+    }
+
+    function getBestSet(tires) {
+      const valid = tires.filter(t => isFinite(t.cpk) && t.cpk < Infinity);
+      if (!valid.length) return new Set();
+      valid.sort((a,b) => a.cpk - b.cpk);
+      const n = Math.max(1, Math.ceil(valid.length * 0.2));
+      return new Set(valid.slice(0,n).map(t => t.id));
+    }
+
+    // State
+    const state = {clientId:db.clients[0].id, tab:"fleet", status:"all", q:""};
+    let cachedClient = null, cachedTires = null, bestSet = new Set();
+    let drawerCtx = {type:null, photos:[], title:""};
+    let photoState = {open:false, title:"", photos:[], idx:0};
+
+    function getClient() {
+      if (!cachedClient || cachedClient.id !== state.clientId) {
+        cachedClient = db.clients.find(c => c.id === state.clientId);
+        cachedTires = collectTires(cachedClient);
+        bestSet = getBestSet(cachedTires);
+      }
+      return cachedClient;
+    }
+    function getTires() { getClient(); return cachedTires; }
+
+    // DOM
+    const els = {};
+    ['clientSel','statusSel','q','mainTitle','mainSub','kpis','chipOk','chipWarn','chipCrit',
+     'priorityList','events','eventsCount','viewFleet','viewVehicle','viewTires','vehicleWrap','tiresTable','tiresCount',
+     'drawerOverlay','drawerClose','drawerTitle','drawerSub','drawerStatusChip','drawerUpdated','drawerFields',
+     'controls','filtersToggle','quickActionsToggle','themeToggle','clearBtn','drawerAction1','drawerAction2','drawerAction3',
+     'photoOverlay','photoTitle','photoImg','photoDots','photoPrev','photoNext','photoClose'].forEach(id => els[id] = $(id));
+
+    // Init
+    function init() {
+      if (els.clientSel) {
+        els.clientSel.innerHTML = db.clients.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join("");
+        els.clientSel.value = state.clientId;
+      }
+
+      document.querySelector('.tabs').addEventListener('click', e => {
+        const tab = e.target.closest('.tab');
+        if (!tab) return;
+        switchTab(tab.dataset.tab);
+      });
+
+      if (els.clientSel) els.clientSel.addEventListener('change', e => { state.clientId = e.target.value; cachedClient = null; render(); });
+      els.statusSel.addEventListener('change', e => { state.status = e.target.value; updateFilterChipsUI(); render(); });
+      els.q.addEventListener('input', debounce(e => { state.q = e.target.value.trim().toLowerCase(); render(); }, 150));
+      els.clearBtn.addEventListener('click', () => { state.status = "all"; state.q = ""; els.statusSel.value = "all"; els.q.value = ""; updateFilterChipsUI(); render(); });
+
+      // Clickable KPIs and filter chips
+      $('kpis').addEventListener('click', e => {
+        const kpi = e.target.closest('.kpi[data-go]');
+        if (kpi) { switchTab(kpi.dataset.go); return; }
+        
+        const costsKpi = e.target.closest('.kpi[data-action="costs"]');
+        if (costsKpi) { showCostsDrawer(); return; }
+      });
+      $('filterChips').addEventListener('click', e => {
+        const chip = e.target.closest('.chip[data-filter]');
+        if (chip) {
+          const filter = chip.dataset.filter;
+          // Переключение фильтра (повторный клик - сброс)
+          state.status = state.status === filter ? "all" : filter;
+          els.statusSel.value = state.status;
+          updateFilterChipsUI();
+          render();
+          return;
+        }
+        const goChip = e.target.closest('.chip[data-go]');
+        if (goChip) switchTab(goChip.dataset.go);
+      });
+
+      let filtersOpen = false;
+      const mq = window.matchMedia("(max-width:979px)");
+      const updateFilters = () => els.controls.classList.toggle('controlsCollapsed', mq.matches && !filtersOpen);
+      els.filtersToggle.addEventListener('click', () => { filtersOpen = !filtersOpen; updateFilters(); });
+      els.themeToggle.addEventListener('click', () => {
+        const html = document.documentElement;
+        const isLight = html.getAttribute('data-theme') === 'light';
+        if (isLight) { html.removeAttribute('data-theme'); localStorage.setItem('sg-theme','dark'); }
+        else { html.setAttribute('data-theme','light'); localStorage.setItem('sg-theme','light'); }
+      });
+      mq.addEventListener('change', updateFilters);
+      updateFilters();
+
+      els.quickActionsToggle.addEventListener('click', () => {
+        const c = getClient();
+        openDrawer({title:"Быстрые действия",sub:c.name,status:"ok",updated:c.updatedAt,fields:[
+          {k:"Согласовать сервис",v:"Подтвердить рекомендуемые работы"},
+          {k:"Замена или списание шины",v:"Оформить замену/списание по позиции"},
+          {k:"Подать рекламацию",v:"Открыть заявку по шине или ТС"},
+          {k:"Записаться на сервис",v:"Выбрать слот и СТО"},
+          {k:"Заказать шины",v:"Подбор и заказ по парку"},
+          {k:"Жалобы и статусы",v:"Отслеживание заявок и обращений"}
+        ]});
+      });
+
+      els.drawerClose.addEventListener('click', closeDrawer);
+      els.drawerOverlay.addEventListener('click', e => { if (e.target === els.drawerOverlay) closeDrawer(); });
+      els.drawerAction2.addEventListener('click', () => {
+        if ((drawerCtx.type === "tire" || drawerCtx.type === "vehicle") && drawerCtx.photos.length)
+          openPhoto(drawerCtx.title, drawerCtx.photos, 0);
+      });
+
+      els.photoClose.addEventListener('click', closePhoto);
+      els.photoOverlay.addEventListener('click', e => { if (e.target === els.photoOverlay) closePhoto(); });
+      els.photoPrev.addEventListener('click', () => movePhoto(-1));
+      els.photoNext.addEventListener('click', () => movePhoto(1));
+
+      document.addEventListener('keydown', e => {
+        if (e.key === "Escape") { if (photoState.open) closePhoto(); else closeDrawer(); }
+        if (photoState.open && e.key === "ArrowLeft") movePhoto(-1);
+        if (photoState.open && e.key === "ArrowRight") movePhoto(1);
+      });
+
+      // Touch swipe
+      let touchX = null;
+      els.photoImg.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, {passive:true});
+      els.photoImg.addEventListener('touchend', e => {
+        if (touchX === null) return;
+        const dx = e.changedTouches[0].clientX - touchX;
+        touchX = null;
+        if (Math.abs(dx) > 45) movePhoto(dx < 0 ? 1 : -1);
+      }, {passive:true});
+
+      $('priorityList').addEventListener('click', handlePriorityClick);
+      $('events').addEventListener('click', handleEventClick);
+      $('vehicleWrap').addEventListener('click', handleVehicleClick);
+      $('tiresTable').addEventListener('click', handleTireTableClick);
+
+      render();
+    }
+
+    function debounce(fn, ms) { let t; return function(...a) { clearTimeout(t); t = setTimeout(() => fn.apply(this, a), ms); }; }
+
+    function switchTab(tabName) {
+      state.tab = tabName;
+      // Сброс фильтра при переходе на другую вкладку
+      if (tabName !== 'fleet') {
+        state.status = 'all';
+        els.statusSel.value = 'all';
+      }
+      document.querySelectorAll('.tab').forEach(t => {
+        const isActive = t.dataset.tab === tabName;
+        t.classList.toggle('active', isActive);
+        t.setAttribute('aria-selected', isActive);
+      });
+      render();
+    }
+
+    function updateFilterChipsUI() {
+      document.querySelectorAll('#filterChips .chip[data-filter]').forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.filter === state.status);
+      });
+    }
+
+    // Render
+    function render() {
+      const client = getClient();
+      const titles = {fleet:"Обзор парка", vehicle:"Карта ТС", tires:"Реестр шин"};
+      const subs = {fleet:"Состояние шин по ТС, отклонения и риски", vehicle:"Состояние шин по автомобилям, инспекции", tires:"История, инспекции, фото. Подсветка — стоимость 1 км"};
+      els.mainTitle.textContent = titles[state.tab];
+      els.mainSub.textContent = `${subs[state.tab]} · Обновление: ${client.updatedAt}`;
+
+      els.viewFleet.hidden = state.tab !== "fleet";
+      els.viewVehicle.hidden = state.tab !== "vehicle";
+      els.viewTires.hidden = state.tab !== "tires";
+
+      renderFleet(client);
+      renderVehicles(client);
+      renderTires(client);
+      renderEvents(client);
+      updateFilterChipsUI();
+    }
+
+    function renderFleet(client) {
+      const f = client.fleet;
+      const kpiData = [
+        {label:"ТС",value:f.vehicles,hint:"В зоне ответственности",go:"vehicle"},
+        {label:"Шины",value:f.tires,hint:"С привязкой к позициям",go:"tires"},
+        {label:"Прогноз затрат",value:fmtUAH(f.forecastCost30),hint:"Детализация и сравнение было/стало",action:"costs"},
+        {label:"Риск простоя",value:f.downtimeRisk30,hint:"SLA: "+f.sla}
+      ];
+      els.kpis.innerHTML = kpiData.map(k => `<div class="kpi${k.go||k.action?" clickable":""}"${k.go?` data-go="${k.go}"`:""}${k.action?` data-action="${k.action}"`:""}>
+        <div class="label">${k.label}</div><div class="value">${k.value}</div><div class="hint">${esc(k.hint)}</div>
+      </div>`).join("");
+
+      els.chipOk.textContent = `Норма: ${f.ok}`;
+      els.chipWarn.textContent = `Внимание: ${f.warn}`;
+      els.chipCrit.textContent = `Критично: ${f.crit}`;
+
+      let actions = filterByStatusAndQuery(client.actions, 'severity', a => `${a.title} ${a.desc} ${a.tags.join(" ")}`);
+      actions.sort((a,b) => bySev(a.severity) - bySev(b.severity));
+
+      els.priorityList.innerHTML = actions.length
+        ? actions.map(a => `
+          <div class="item" data-action="${a.id}">
+            <div class="dot ${sevClass(a.severity)}" style="margin-top:6px"></div>
+            <div class="meta">
+              <p class="title">${esc(a.title)}
+                <span class="badge ${sevClass(a.severity)}">${sevLabel(a.severity)}</span>
+                <span class="badge">Срок: ${a.due}</span>
+                <span class="badge">Оценка: ${fmtUAH(a.cost)}</span>
+              </p>
+              <p class="desc">${esc(a.desc)}</p>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+                ${a.tags.map(t => `<span class="badge">${esc(t)}</span>`).join("")}
+              </div>
+            </div>
+          </div>`).join("")
+        : emptyState("Нет элементов","Измените фильтры.");
+    }
+
+    function renderVehicles(client) {
+      let vehicles = filterByStatusAndQuery(client.vehicles, 'status', v => `${v.title} ${v.plate} ${v.notes} ${v.driver?.name||""}`);
+
+      els.vehicleWrap.innerHTML = vehicles.length
+        ? vehicles.map(v => {
+          const svc = v.service;
+          const svcHtml = svc ? `
+            <div class="svcBlock">
+              <div class="svcHead">
+                <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                СТО: ${esc(svc.station)} • ${svc.lastVisit}
+              </div>
+              <div class="svcRow">
+                ${svc.done.slice(0,3).map(d => `<span class="svcItem done">✓ ${esc(d)}</span>`).join("")}
+              </div>
+              ${svc.recommended.length ? `<div class="svcRow">${svc.recommended.slice(0,3).map(r => `<span class="svcItem rec">⚠ ${esc(r)}</span>`).join("")}</div>` : ""}
+              <button class="svcBtn" data-report="${svc.reportId}">📄 Отчёт по инспекции</button>
+            </div>` : "";
+
+          return `
+          <div class="vehicleCard" data-vehicle="${v.id}">
+            <div class="vehTop">
+              <div style="min-width:0">
+                <h3>${esc(v.title)} • ${esc(v.plate)}</h3>
+                <div class="small">Инспекция: ${v.lastInspection}</div>
+                <div class="small">${esc(v.notes)}</div>
+              </div>
+              <span class="chip"><span class="dot ${sevClass(v.status)}"></span><span>${sevLabel(v.status)}</span></span>
+            </div>
+            <div class="ratingRow">
+              <span class="chip"><span class="dot"></span><span>Водитель: ${esc(v.driver?.name || "—")}</span></span>
+              <div class="stars">${starsHtml(v.driver?.rating||0)}</div>
+              <div class="ratingHint">${(v.driver?.rating??0).toFixed(1)} • 30д: ${(v.driver?.last30??0).toFixed(1)}</div>
+            </div>
+            ${v.photos?.length ? `<div class="vehPhotos">${v.photos.slice(0,3).map((url,i)=>`<div class="vehPhoto" data-veh="${v.id}" data-idx="${i}"><img src="${url}" alt="ТС" loading="lazy"></div>`).join("")}</div>` : ""}
+            ${svcHtml}
+            <div class="axles">
+              ${v.axles.map(ax => `
+                <div class="axle">
+                  <div class="label">${ax.name}</div>
+                  <div class="tires">${ax.tires.map(t => `<div class="tire ${sevClass(t.risk)}" data-tire="${t.id}" title="${esc(t.code)}">${esc(t.pos)}</div>`).join("")}</div>
+                </div>`).join("")}
+            </div>
+          </div>`}).join("")
+        : `<div class="vehicleCard"><div class="vehTop"><div><h3>Нет ТС</h3><div class="small">Измените фильтры.</div></div></div></div>`;
+    }
+
+    function renderTires(client) {
+      const allTires = getTires();
+      let filtered = filterByStatusAndQuery(allTires, 'risk', t => `${t.code} ${t.brand||""} ${t.serialNo||""} ${t.vTitle} ${t.plate} ${t.pos} ${t.axle} ${t.wear} ${t.replaceETA}`);
+      filtered.sort((a,b) => a.cpk - b.cpk);
+
+      els.tiresCount.textContent = `Отображено: ${filtered.length} / ${allTires.length}`;
+
+      els.tiresTable.innerHTML = filtered.map(t => {
+        const isBest = bestSet.has(t.id);
+        const thumbs = t.photos?.length
+          ? t.photos.slice(0,3).map((url,i) => `<div class="thumb" data-tire="${t.id}" data-idx="${i}"><img src="${url}" alt="${esc(t.code)}" loading="lazy"></div>`).join("")
+          : `<div class="thumbLabel">Нет фото</div>`;
+
+        const warrantyHtml = t.product && t.warranty
+          ? `<span class="warrantyBadge"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>${esc(t.warranty.type)}</span>`
+          : "";
+        const repairsHtml = t.repairs?.length
+          ? `<span class="repairBadge">🔧 ${t.repairs.length} ремонт${t.repairs.length>1?"а":""}</span>`
+          : "";
+
+        return `
+          <tr data-tire="${t.id}">
+            <td>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                <span class="chip"><span class="dot ${sevClass(t.risk)}"></span><span>${esc(t.code)}</span></span>
+                ${isBest ? `<span class="badge best">ТОП</span>` : ""}
+                <span class="badge">${esc(t.brand||"—")}</span>
+                ${warrantyHtml}
+                ${repairsHtml}
+              </div>
+            </td>
+            <td class="rowLine">${esc(t.vTitle)} • ${esc(t.plate)}</td>
+            <td class="rowCols">
+              <span class="badge">${esc(t.axle)} • ${esc(t.pos)}</span>
+              <span class="badge">Остаток: ${t.tread.toFixed(1)} мм</span>
+              <span class="badge ${sevClass(t.risk)}">${sevLabel(t.risk)}</span>
+            </td>
+            <td class="rowCols">
+              <span class="badge">Пробег: ${t.kmRun ? fmtK(t.kmRun) : "—"}</span>
+              <span class="badge">Цена: ${t.cost ? fmtUAH(t.cost) : "—"}</span>
+              <span class="badge ${isBest?"best":""}">1км: ${fmtCpk(t.cpk)}</span>
+            </td>
+            <td><div class="thumbRow"><div class="thumbs">${thumbs}</div></div></td>
+          </tr>`;
+      }).join("");
+    }
+
+    function renderEvents(client) {
+      let evs = filterByStatusAndQuery(client.events, 'severity', e => `${e.title} ${e.desc} ${e.when}`);
+      evs.sort((a,b) => bySev(a.severity) - bySev(b.severity));
+
+      els.eventsCount.textContent = `Событий: ${evs.length}`;
+      els.events.innerHTML = evs.length
+        ? evs.map(e => `
+          <div class="item" data-event="${e.id}">
+            <div class="dot ${sevClass(e.severity)}" style="margin-top:6px"></div>
+            <div class="meta">
+              <p class="title">${esc(e.title)}
+                <span class="badge ${sevClass(e.severity)}">${sevLabel(e.severity)}</span>
+                <span class="badge">Дата: ${e.when}</span>
+              </p>
+              <p class="desc">${esc(e.desc)}</p>
+            </div>
+          </div>`).join("")
+        : emptyState("Нет событий","Измените фильтры.");
+    }
+
+    function filterByStatusAndQuery(arr, statusKey, textFn) {
+      let result = arr;
+      if (state.status !== "all") result = result.filter(x => x[statusKey] === state.status);
+      if (state.q) result = result.filter(x => textFn(x).toLowerCase().includes(state.q));
+      return result;
+    }
+    function emptyState(title, desc) {
+      return `<div class="item" style="cursor:default"><div class="meta"><p class="title">${esc(title)}</p><p class="desc">${esc(desc)}</p></div></div>`;
+    }
+
+    // Event handlers
+    function handlePriorityClick(e) {
+      const item = e.target.closest('.item[data-action]');
+      if (!item) return;
+      const client = getClient();
+      const a = client.actions.find(x => x.id === item.dataset.action);
+      if (!a) return;
+      openDrawer({title:a.title,sub:`Рекомендация • ${client.name}`,status:a.severity,updated:client.updatedAt,fields:[
+        {k:"Срочность",v:sevLabel(a.severity)},{k:"Срок",v:a.due},{k:"Оценка",v:fmtUAH(a.cost)},
+        {k:"Обоснование",v:a.desc},{k:"Теги",v:a.tags.join(", ")},{k:"Следующий шаг",v:"Заказ-наряд → согласование"}
+      ]});
+      setDrawerCtx(null,[],null);
+    }
+
+    function handleEventClick(e) {
+      const item = e.target.closest('.item[data-event]');
+      if (!item) return;
+      const client = getClient();
+      const ev = client.events.find(x => x.id === item.dataset.event);
+      if (!ev) return;
+      openDrawer({title:ev.title,sub:`Событие • ${client.name}`,status:ev.severity,updated:client.updatedAt,fields:[
+        {k:"Дата",v:ev.when},{k:"Приоритет",v:sevLabel(ev.severity)},{k:"Описание",v:ev.desc},
+        {k:"SLA",v:client.fleet.sla},{k:"Следующий шаг",v:"Подтвердить слот"}
+      ]});
+      setDrawerCtx(null,[],null);
+    }
+
+    function handleVehicleClick(e) {
+      const client = getClient();
+      // Click tire
+      const tireEl = e.target.closest('.tire[data-tire]');
+      if (tireEl) {
+        e.stopPropagation();
+        const t = getTires().find(x => x.id === tireEl.dataset.tire);
+        showTireDrawer(t, client);
+        return;
+      }
+      // Click photo
+      const photoEl = e.target.closest('.vehPhoto[data-veh]');
+      if (photoEl) {
+        e.stopPropagation();
+        const v = client.vehicles.find(x => x.id === photoEl.dataset.veh);
+        if (v?.photos?.length) openPhoto(`${v.title} • ${v.plate}`, v.photos, +photoEl.dataset.idx || 0);
+        return;
+      }
+      // Click report button
+      const reportBtn = e.target.closest('.svcBtn[data-report]');
+      if (reportBtn) {
+        e.stopPropagation();
+        alert(`Открытие отчёта: ${reportBtn.dataset.report}`);
+        return;
+      }
+      // Click card
+      const vCard = e.target.closest('.vehicleCard[data-vehicle]');
+      if (!vCard) return;
+      const v = client.vehicles.find(x => x.id === vCard.dataset.vehicle);
+      if (!v) return;
+      const fields = [
+        {k:"Инспекция",v:v.lastInspection},{k:"Статус",v:sevLabel(v.status)},{k:"Замечания",v:v.notes},
+        {k:"Водитель",v:v.driver?.name||"—"},{k:"Рейтинг",v:`${(v.driver?.rating??0).toFixed(1)} (30д: ${(v.driver?.last30??0).toFixed(1)})`},
+        {k:"Комментарий",v:v.driver?.notes||"—"}
+      ];
+      // Service info
+      if (v.service) {
+        fields.push({k:"🚗 Последний СТО",v:`${v.service.station} (${v.service.lastVisit})`});
+        if (v.service.done?.length) fields.push({k:"✓ Выполнено",v:v.service.done.join("; ")});
+        if (v.service.recommended?.length) fields.push({k:"⚠ Рекомендовано",v:v.service.recommended.join("; ")});
+        fields.push({k:"Отчёт",v:`#${v.service.reportId}`});
+      }
+      fields.push({k:"Фото ТС",v:v.photos?.length?`${v.photos.length} шт (кнопка «Открыть фото»)`:"Нет"});
+      openDrawer({title:`ТС: ${v.title}`,sub:v.plate,status:v.status,updated:client.updatedAt,fields});
+      setDrawerCtx("vehicle", v.photos||[], `ТС: ${v.title}`);
+    }
+
+    function handleTireTableClick(e) {
+      const client = getClient();
+      // Click thumb
+      const thumbEl = e.target.closest('.thumb[data-tire]');
+      if (thumbEl) {
+        e.stopPropagation();
+        const t = getTires().find(x => x.id === thumbEl.dataset.tire);
+        if (t?.photos?.length) openPhoto(`Шина ${t.code}`, t.photos, +thumbEl.dataset.idx || 0);
+        return;
+      }
+      // Click row
+      const row = e.target.closest('tr[data-tire]');
+      if (!row) return;
+      const t = getTires().find(x => x.id === row.dataset.tire);
+      showTireDrawer(t, client);
+    }
+
+    function showTireDrawer(t, client) {
+      if (!t) return;
+      const isBest = bestSet.has(t.id);
+      const fields = [
+        {k:"Марка",v:t.brand||"—"},{k:"Серийный номер",v:t.serialNo||"—"},
+        {k:"Пробег",v:t.kmRun?fmtKM(t.kmRun):"—"},{k:"Стоимость шины",v:t.cost?fmtUAH(t.cost):"—"},
+        {k:"Стоимость 1 км",v:fmtCpk(t.cpk)+(isBest?" • ТОП":"")},
+        {k:"Остаток протектора",v:`${t.tread.toFixed(1)} мм`},{k:"Характер износа",v:t.wear},{k:"Давление",v:t.pressure},
+        {k:"Прогноз замены",v:t.replaceETA},{k:"Ост. ресурс",v:t.kmLeft?fmtKM(t.kmLeft):"—"}
+      ];
+      // Warranty info
+      if (t.product && t.warranty) {
+        fields.push({k:"🛡️ Гарантия",v:`${t.warranty.type} (до ${t.warranty.until})`});
+        if (t.warranty.services?.length) fields.push({k:"Сервисные опции",v:t.warranty.services.join("; ")});
+      } else {
+        fields.push({k:"Гарантия",v:"Не в продукте"});
+      }
+      // Repairs
+      if (t.repairs?.length) {
+        const repList = t.repairs.map(r => `${r.date}: ${r.type} (${fmtUAH(r.cost)}) — ${r.station}`).join("\n");
+        fields.push({k:"🔧 История ремонтов",v:repList});
+      }
+      fields.push(
+        {k:"Фото шины",v:t.photos?.length?`${t.photos.length} шт (кнопка «Открыть фото»)`:"Нет"},
+        {k:"Водитель",v:t.driver?`${t.driver.name} • ${(t.driver.rating??0).toFixed(1)}`:"—"},
+        {k:"Рекомендация",v:t.risk==="crit"?"Замена приоритетно":t.risk==="warn"?"Контроль + план":"По графику"}
+      );
+      openDrawer({title:`Шина ${t.code}`,sub:`${t.vTitle} • ${t.plate} • ${t.axle} • ${t.pos}`,status:t.risk,updated:client.updatedAt,fields});
+      setDrawerCtx("tire", t.photos||[], `Шина ${t.code}`);
+    }
+
+    function showCostsDrawer() {
+      const client = getClient();
+      const c = client.fleet.costs;
+      const total = c.maintenance + c.repair + c.tires;
+      const fields = [
+        {k:"🔧 Обслуживание (ТО)",v:`${fmtUAH(c.maintenance)}\n${c.maintenanceItems.join("\n")}`},
+        {k:"🛠️ Ремонт",v:`${fmtUAH(c.repair)}\n${c.repairItems.join("\n")}`},
+        {k:`🛞 Закупка шин (${c.tiresCount} шт)`,v:`${fmtUAH(c.tires)}\n${c.tiresItems.join("\n")}`},
+        {k:"📊 ИТОГО",v:fmtUAH(total)}
+      ];
+      openDrawer({
+        title:"Прогноз затрат (30 дней)",
+        sub:client.name,
+        status:"ok",
+        updated:client.updatedAt,
+        fields
+      });
+      setDrawerCtx(null,[],null);
+    }
+
+    // Drawer
+    function openDrawer({title, sub, status, updated, fields}) {
+      els.drawerTitle.textContent = title;
+      els.drawerSub.textContent = sub;
+      els.drawerStatusChip.innerHTML = `<span class="dot ${sevClass(status)}"></span><span>${sevLabel(status)}</span>`;
+      els.drawerUpdated.textContent = `Обновлено: ${updated}`;
+      els.drawerFields.innerHTML = fields.map(f => `<div class="field"><div class="k">${esc(f.k)}</div><div class="v">${esc(f.v).replace(/\n/g,"<br>")}</div></div>`).join("");
+      els.drawerOverlay.style.display = "flex";
+      setDrawerButtons(null);
+    }
+    function closeDrawer() { els.drawerOverlay.style.display = "none"; }
+    function setDrawerCtx(type, photos, title) {
+      drawerCtx = {type, photos: photos||[], title: title||""};
+      setDrawerButtons(type);
+    }
+    function setDrawerButtons(type) {
+      els.drawerAction1.textContent = "Согласовать сервис";
+      els.drawerAction2.textContent = (type === "tire" || type === "vehicle") ? "Фото / Инспекции" : "Комментарий";
+      els.drawerAction3.textContent = "Записаться на сервис";
+    }
+
+    // Photo viewer
+    function openPhoto(title, photos, idx) {
+      if (!photos?.length) return;
+      photoState = {open:true, title, photos:photos.slice(), idx:Math.max(0,Math.min(photos.length-1,idx||0))};
+      els.photoOverlay.style.display = "block";
+      renderPhoto();
+    }
+    function closePhoto() { photoState.open = false; els.photoOverlay.style.display = "none"; }
+    function movePhoto(d) {
+      if (!photoState.open || !photoState.photos.length) return;
+      const n = photoState.photos.length;
+      photoState.idx = (photoState.idx + d + n) % n;
+      renderPhoto();
+    }
+    function renderPhoto() {
+      const {title, photos, idx} = photoState;
+      els.photoTitle.textContent = `${title} • ${idx+1}/${photos.length}`;
+      els.photoImg.src = photos[idx];
+      els.photoDots.innerHTML = photos.map((_,i) => `<div class="pDot${i===idx?" on":""}" data-i="${i}"></div>`).join("");
+      els.photoDots.querySelectorAll('.pDot').forEach(d => d.addEventListener('click', () => { photoState.idx = +d.dataset.i; renderPhoto(); }));
+    }
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+    else init();
+  })();
+  </script>
+</body>
+</html>
