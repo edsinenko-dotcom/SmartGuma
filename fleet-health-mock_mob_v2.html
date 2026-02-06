@@ -33,7 +33,6 @@
       .btn{min-height:44px;padding:10px 14px}
       .btn.icon{min-width:44px;min-height:44px}
       .pill{min-height:44px;padding:10px 12px}
-      .themeToggleWrap{display:none}
     }
     @media(max-width:380px){
       .kpiRow{grid-template-columns:1fr}
@@ -42,7 +41,7 @@
     .card-base{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.05));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
     .topbar.card-base{background:linear-gradient(180deg,rgba(18,25,45,.97),rgba(12,18,35,.98));border-color:var(--border);color:var(--text)}
     .topbar .brand h1,.topbar .brand p,.topbar .pill label,.topbar .btn{color:var(--text)}
-    .topbar{display:flex;flex-direction:column;gap:10px;padding:12px;position:sticky;top:calc(10px + env(safe-area-inset-top));backdrop-filter:blur(10px);z-index:10}
+    .topbar{display:flex;flex-direction:column;gap:12px;padding:12px;position:sticky;top:calc(10px + env(safe-area-inset-top));backdrop-filter:blur(10px);z-index:10}
     .topRow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
     .brand{display:flex;gap:10px;align-items:center;min-width:0;flex:1}
     .logo{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,var(--accent1),var(--accent2));box-shadow:0 10px 30px rgba(59,130,246,.25);border:1px solid rgba(255,255,255,.14);flex:0 0 auto}
@@ -63,6 +62,7 @@
     .btn.icon{width:42px;display:flex;align-items:center;justify-content:center;padding:0;font-size:16px}
 
     .controls{display:flex;flex-direction:column;gap:10px}
+    .controlsActions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .controlsCollapsed{display:none}
     .pill{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid var(--border);min-height:46px}
     .pill label{font-size:12px;color:var(--muted);flex:0 0 auto;min-width:56px}
@@ -263,10 +263,13 @@
 
     @media(min-width:980px){
       body{padding:18px}
-      .topbar{flex-direction:row;align-items:center;justify-content:space-between;padding:14px 16px;top:12px}
-      .controls{flex-direction:row;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+      .topbar{flex-direction:column;align-items:stretch;justify-content:flex-start;padding:16px;top:12px}
+      .topRow{align-items:center}
+      .controls{display:grid;grid-template-columns:160px minmax(280px,1fr) auto;align-items:center;gap:12px}
+      .controlsActions{justify-content:flex-end}
       #filtersToggle,#quickActionsToggle{display:none}
       .bottomNav{display:none}
+      .productIntro{margin-top:0;max-width:760px}
       .grid{grid-template-columns:1.2fr .8fr;gap:14px;margin-top:14px}
       .cardHeader{flex-direction:row;align-items:flex-start;justify-content:space-between}
       .headerTop{flex:1}
@@ -317,10 +320,9 @@
           <label for="q">Поиск</label>
           <input id="q" type="search" placeholder="ТС, шина, бренд, серийник, инспекция...">
         </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <div class="controlsActions">
           <button class="btn primary" id="createWO">Записаться на сервис</button>
           <button class="btn" id="clearBtn">Сброс</button>
-          <div class="themeToggleWrap"><button class="btn icon themeToggleBtn" aria-label="Тема" title="Переключить тему">🌙</button></div>
         </div>
       </div>
       <div class="productIntro">
